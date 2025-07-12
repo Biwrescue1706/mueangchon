@@ -7,8 +7,17 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const name = e.target.name.value.trim();
   const email = e.target.email.value.trim();
   const password = e.target.password.value;
+  const role = e.target.role.value;
+
+  if (!role) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาเลือกสายงาน (Role)'
+    });
+    return;
+  }
+
   const hash = CryptoJS.SHA256(password).toString();
-<<<<<<< HEAD
 
   try {
     // ดึงข้อมูลทั้งหมดจาก SheetDB
@@ -33,25 +42,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         Password: hash,
         Name: name,
         Email: email,
-        created_at: now,
-        updated_at: now
+        Role: role,
+        created_at: now
       }]
     };
 
     // ส่ง POST
-=======
-
-  const data = {
-    data: [{
-      Username: username,
-      Name: name,
-      Email: email,
-      Password: hash
-    }]
-  };
-
-  try {
->>>>>>> 87e498c9e88dd6a6f8012ba803a20e23953c5919
     const res = await fetch(SHEETDB_USERS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -60,28 +56,14 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
     const text = await res.text();
 
-    console.log('Response status:', res.status);
-    console.log('Response body:', text);
-
     if (res.ok) {
-<<<<<<< HEAD
-      alert('สมัครสมาชิกสำเร็จ!');
-      window.location.href = 'login.html';
-    } else {
-      alert('สมัครสมาชิกล้มเหลว: ' + text);
-    }
-  } catch (err) {
-    alert('เกิดข้อผิดพลาด: ' + err.message);
-  }
-});
-=======
       Swal.fire({
         icon: 'success',
         title: 'สมัครสมาชิกสำเร็จ!',
         showConfirmButton: false,
         timer: 2000
       }).then(() => {
-        window.location.href = 'login.html';
+        window.location.href = 'register.html';
       });
     } else {
       Swal.fire({
@@ -98,4 +80,3 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     });
   }
 });
->>>>>>> 87e498c9e88dd6a6f8012ba803a20e23953c5919

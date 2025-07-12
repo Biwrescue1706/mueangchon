@@ -21,18 +21,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         showConfirmButton: false,
         timer: 1500
       }).then(() => {
-        // สร้าง token จาก username เข้ารหัส base64
+        // ✅ สร้าง token base64 จาก username
         const token = btoa(username);
-        document.cookie = `token=${token}; path=/; max-age=${60}`;
+
+        // ✅ เก็บเป็น cookie ชื่อ token อายุ 10 นาที
+        document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
+
+        // ✅ redirect ไปหน้า index.html
         window.location.href = 'index.html';
       });
-      // ใช้ username เข้ารหัส base64 เป็น token
-      const token = btoa(username);
 
-      // เก็บใน cookie อายุ 10 นาที
-      document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
-
-      window.location.href = 'index.html';
     } else {
       Swal.fire({
         icon: 'error',

@@ -10,54 +10,59 @@ const logoutBtn = document.getElementById('logout-btn');
 
 let books = [];
 
-// โหลดชื่อ
+// === Utils ===
+
+// อ่านค่า cookie
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+// ดึง username จาก token แล้ว decode base64
+function getUsernameFromToken() {
+  const token = getCookie('token');
+  if (!token) return null;
+  return atob(token);
+}
+
+// ลบ cookie
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
+// === ชื่อผู้ใช้ ===
 async function loadNames() {
   try {
     const res = await fetch(SHEETDB_USERS);
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     const data = await res.json();
+
+    const currentUsername = getUsernameFromToken();
+    if (!currentUsername) {
+      errorDiv.textContent = '❌ ไม่พบ token กรุณาเข้าสู่ระบบใหม่';
+      return;
+    }
+
     namesUl.innerHTML = '';
-    data.forEach(item => {
+
+    const matched = data.find(item => item.Username === currentUsername);
+
+    if (matched) {
       const li = document.createElement('li');
-      li.textContent = item.Name || 'ไม่พบชื่อ';
+      li.textContent = matched.Name || 'ไม่พบชื่อ';
       namesUl.appendChild(li);
-    });
+    } else {
+      namesUl.innerHTML = '<li>ไม่พบชื่อผู้ใช้</li>';
+    }
   } catch (err) {
     console.error(err);
     errorDiv.textContent = '❌ ไม่สามารถโหลดชื่อได้';
   }
 }
 
-// สร้างรายการหนังสือ
-function createBookItem(book) {
-  const li = document.createElement('li');
-  li.innerHTML = `
-    <strong>เลขรับ :</strong> ${book.BookNo || '-'}<br>
-    <strong>เลขที่ :</strong> ${book.BookNo || '-'}<br>
-    <strong>วันที่ :</strong> ${book.date || '-'}<br>
-    <strong>จาก :</strong> ${book.from || '-'}<br>
-    <strong>ถึง :</strong> ${book.to || '-'}<br>
-    <strong>เรื่อง :</strong> ${book.Title || 'ไม่มีชื่อ'}<br>
-    <strong>ปฎิบัติงาน :</strong> ${book.Work || '-'}<br>
-    <strong>หมายเหตุ :</strong> ${book.note || '-'}
-  `;
-  return li;
-}
-
-// แสดงรายการหนังสือ
-function displayBooks(list) {
-  booksUl.innerHTML = '';
-  if (list.length === 0) {
-    booksUl.innerHTML = '<li>ไม่พบหนังสือที่ค้นหา</li>';
-    return;
-  }
-  list.forEach(book => {
-    const li = createBookItem(book);
-    booksUl.appendChild(li);
-  });
-}
-
-// โหลดหนังสือ
+// === หนังสือ ===
 async function loadBooks() {
   loadingDiv.style.display = 'block';
   errorDiv.textContent = '';
@@ -75,7 +80,33 @@ async function loadBooks() {
   }
 }
 
-// กรองรายการเมื่อค้นหา
+function createBookItem(book) {
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <strong>เลขรับ :</strong> ${book.BookNo || '-'}<br>
+    <strong>เลขที่ :</strong> ${book.BookNo || '-'}<br>
+    <strong>วันที่ :</strong> ${book.date || '-'}<br>
+    <strong>จาก :</strong> ${book.from || '-'}<br>
+    <strong>ถึง :</strong> ${book.to || '-'}<br>
+    <strong>เรื่อง :</strong> ${book.Title || 'ไม่มีชื่อ'}<br>
+    <strong>ปฏิบัติงาน :</strong> ${book.Work || '-'}<br>
+    <strong>หมายเหตุ :</strong> ${book.note || '-'}
+  `;
+  return li;
+}
+
+function displayBooks(list) {
+  booksUl.innerHTML = '';
+  if (list.length === 0) {
+    booksUl.innerHTML = '<li>ไม่พบหนังสือที่ค้นหา</li>';
+    return;
+  }
+  list.forEach(book => {
+    const li = createBookItem(book);
+    booksUl.appendChild(li);
+  });
+}
+
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
   const filtered = books.filter(book =>
@@ -88,8 +119,13 @@ searchInput.addEventListener('input', () => {
   displayBooks(filtered);
 });
 
+// === logout ===
+logoutBtn.addEventListener('click', () => {
+  deleteCookie('token');
+  window.location.href = 'login.html';
+});
 
-// เริ่มโหลดข้อมูลตอนเปิดหน้า
+// === โหลด ===
 window.addEventListener('DOMContentLoaded', () => {
   loadNames();
   loadBooks();
