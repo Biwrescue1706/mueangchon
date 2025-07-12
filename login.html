@@ -9,42 +9,16 @@
   <h1>เข้าสู่ระบบ</h1>
   <form id="loginForm">
     <label>Username:
-      <input type="text" name="username" required>
+      <input type="text" name="username" required />
     </label><br><br>
     <label>Password:
-      <input type="password" name="password" required>
+      <input type="password" name="password" required />
     </label><br><br>
     <button type="submit">Login</button>
   </form>
 
-  <!-- ใช้ CryptoJS สำหรับ Hash -->
+  <!-- โหลด CryptoJS สำหรับ hash password -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script>
-    const SHEETDB_USERS = 'https://sheetdb.io/api/v1/e2bc8d71li1qz';
-
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const username = e.target.username.value.trim();
-      const password = e.target.password.value;
-      const hash = CryptoJS.SHA256(password).toString();
-
-      // โหลด Users ทั้งหมด
-      const res = await fetch(SHEETDB_USERS);
-      const users = await res.json();
-
-      const found = users.find(user =>
-        user.Username === username && user.Password === hash
-      );
-
-      if (found) {
-        alert('เข้าสู่ระบบสำเร็จ!');
-        localStorage.setItem('loggedInUser', JSON.stringify(found));
-        window.location.href = 'add-book.html'; // ไปหน้าอื่นได้ตามต้องการ
-      } else {
-        alert('Username หรือ Password ไม่ถูกต้อง');
-      }
-    });
-  </script>
+  <script src="js/login.js"></script>
 </body>
 </html>
