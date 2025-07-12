@@ -26,8 +26,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         document.cookie = `token=${token}; path=/; max-age=${60}`;
         window.location.href = 'index.html';
       });
-
-<<<<<<< HEAD
       // ใช้ username เข้ารหัส base64 เป็น token
       const token = btoa(username);
 
@@ -35,8 +33,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
 
       window.location.href = 'index.html';
-=======
->>>>>>> 87e498c9e88dd6a6f8012ba803a20e23953c5919
     } else {
       Swal.fire({
         icon: 'error',
