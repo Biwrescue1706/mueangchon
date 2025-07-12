@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>สมัครสมาชิก</h1>
+  <form id="registerForm">
+    <label>Username:
+      <input type="text" name="username" required>
+    </label><br><br>
+    <label>Name:
+      <input type="text" name="name" required>
+    </label><br><br>
+    <label>Email:
+      <input type="email" name="email" required>
+    </label><br><br>
+    <label>Password:
+      <input type="password" name="password" required>
+    </label><br><br>
+    <button type="submit">Register</button>
+  </form>
+
+  <!-- ใช้ CryptoJS สำหรับ Hash -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    const SHEETDB_USERS = 'https://sheetdb.io/api/v1/e2bc8d71li1qz';
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = e.target.username.value.trim();
+      const name = e.target.name.value.trim();
+      const email = e.target.email.value.trim();
+      const password = e.target.password.value;
+      const hash = CryptoJS.SHA256(password).toString();
+
+      const data = {
+        data: [{
+          Username: username,
+          Name: name,
+          Email: email,
+          Password: hash
+        }]
+      };
+
+      const res = await fetch(SHEETDB_USERS, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (res.ok) {
+        alert('สมัครสมาชิกสำเร็จ!');
+        window.location.href = 'index.html'; // กลับไปหน้า Login
+      } else {
+        alert('เกิดข้อผิดพลาด!');
+      }
+    });
+  </script>
+</body>
+</html>
