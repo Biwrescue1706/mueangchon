@@ -20,8 +20,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       // ใช้ username เข้ารหัส base64 เป็น token
       const token = btoa(username);
 
-      // เก็บใน cookie อายุ 1 วัน
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+      // เก็บใน cookie อายุ 10 นาที
+      document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
 
       window.location.href = 'index.html';
     } else {
