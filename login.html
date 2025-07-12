@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>เข้าสู่ระบบ</h1>
+  <form id="loginForm">
+    <label>Username: <input type="text" name="username" required /></label><br><br>
+    <label>Password: <input type="password" name="password" required /></label><br><br>
+    <button type="submit">Login</button>
+  </form>
+
+  <script>
+    const BACKEND_URL = 'https://your-backend.onrender.com/api/login'; // URL ของ Backend API
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        // สมมติ API ส่ง back token หรือ user data
+        localStorage.setItem('token', result.token);
+        alert('เข้าสู่ระบบสำเร็จ!');
+        // redirect ไปหน้าหลัก
+        window.location.href = '/add-book.html';
+      } else {
+        alert('Username หรือ Password ไม่ถูกต้อง');
+      }
+    });
+  </script>
+</body>
+</html>
