@@ -23,7 +23,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       }).then(() => {
         // สร้าง token จาก username เข้ารหัส base64
         const token = btoa(username);
-        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+        document.cookie = `token=${token}; path=/; max-age=${60}`;
         window.location.href = 'index.html';
       });
 
