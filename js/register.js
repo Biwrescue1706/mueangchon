@@ -8,6 +8,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const email = e.target.email.value.trim();
   const password = e.target.password.value;
   const hash = CryptoJS.SHA256(password).toString();
+<<<<<<< HEAD
 
   try {
     // ดึงข้อมูลทั้งหมดจาก SheetDB
@@ -38,6 +39,19 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     };
 
     // ส่ง POST
+=======
+
+  const data = {
+    data: [{
+      Username: username,
+      Name: name,
+      Email: email,
+      Password: hash
+    }]
+  };
+
+  try {
+>>>>>>> 87e498c9e88dd6a6f8012ba803a20e23953c5919
     const res = await fetch(SHEETDB_USERS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,6 +64,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     console.log('Response body:', text);
 
     if (res.ok) {
+<<<<<<< HEAD
       alert('สมัครสมาชิกสำเร็จ!');
       window.location.href = 'login.html';
     } else {
@@ -59,3 +74,28 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     alert('เกิดข้อผิดพลาด: ' + err.message);
   }
 });
+=======
+      Swal.fire({
+        icon: 'success',
+        title: 'สมัครสมาชิกสำเร็จ!',
+        showConfirmButton: false,
+        timer: 2000
+      }).then(() => {
+        window.location.href = 'login.html';
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'สมัครสมาชิกล้มเหลว',
+        text: text
+      });
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: err.message
+    });
+  }
+});
+>>>>>>> 87e498c9e88dd6a6f8012ba803a20e23953c5919
