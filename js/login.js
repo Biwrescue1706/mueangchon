@@ -15,19 +15,31 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const found = users.find(u => u.Username === username && u.Password === hash);
 
     if (found) {
-      alert('เข้าสู่ระบบสำเร็จ!');
+      Swal.fire({
+        icon: 'success',
+        title: 'เข้าสู่ระบบสำเร็จ!',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        // สร้าง token จาก username เข้ารหัส base64
+        const token = btoa(username);
+        document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
+        window.location.href = 'index.html';
+      });
 
-      // ใช้ username เข้ารหัส base64 เป็น token
-      const token = btoa(username);
-
-      // เก็บใน cookie อายุ 1 วัน
-      document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`;
-
-      window.location.href = 'index.html';
     } else {
-      alert('Username หรือ Password ไม่ถูกต้อง');
+      Swal.fire({
+        icon: 'error',
+        title: 'Username หรือ Password ไม่ถูกต้อง',
+        showConfirmButton: true
+      });
     }
+
   } catch (err) {
-    alert('เกิดข้อผิดพลาด: ' + err.message);
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: err.message
+    });
   }
 });
