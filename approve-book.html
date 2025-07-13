@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>แทงหนังสือ - งานธุรการ สภ.เมืองชลบุรี</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>แทงหนังสือ (สำหรับ ผกก.)</h1>
+
+  <table id="booksTable" border="1" cellpadding="8" cellspacing="0" style="width:100%; max-width:900px; margin-bottom:1rem;">
+    <thead>
+      <tr>
+        <th>รหัสหนังสือ</th>
+        <th>หัวข้อ</th>
+        <th>ผู้มอบหมาย</th>
+        <th>เลือกสายงาน</th>
+        <th>สถานะ</th>
+        <th>ดำเนินการแล้ว</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ข้อมูลจะถูกโหลดจาก API มาแสดงที่นี่ -->
+    </tbody>
+  </table>
+
+  <button id="saveBtn">บันทึกการแทงหนังสือ</button>
+
+  <script>
+    const SHEETDB_API = 'https://sheetdb.io/api/v1/YOUR_API_KEY/books';
+
+    // โหลดข้อมูลหนังสือที่ยังไม่แทง (หรือรอ ผกก ลงนาม)
+    async function loadBooks() {
+      const res = await fetch(`${SHEETDB_API}?DeptStatus=รอผกกลงนาม`);
+      const data = await res.json();
+      const tbody = document.querySelector('#booksTable tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(book => {
+        const tr = document.createElement('tr');
+        tr.dataset.bookid = book.BookId;
+
+        // คอลัมน์เลือกสายงาน (checkbox แบบหลายเลือก)
+        const deptOptions = ['รอง ผกก.ป.ฯ', 'รอง ผกก.จรฯ', 'รอง ผกก.(สอบสวน)ฯ', 'รอง ผกก.สืบสวนฯ', 'สว.อกฯ'];
+
+        const deptCheckboxes = deptOptions.map(dept => {
+          const checked = book.Department === dept ? 'checked' : '';
+          return `<label><input type="checkbox" class="dept-checkbox" value="${dept}" ${checked}>${dept}</label>`;
+        }).join(' ');
+
+        // คอลัมน์สถานะ & ดำเนินการแล้ว (checkbox)
+        const status = book.DeptStatus || 'รอดำเนินการ';
+        const doneChecked = status === 'ดำเนินการแล้ว' ? 'checked' : '';
+
+        tr.innerHTML = `
+          <td>${book.BookId}</td>
+          <td>${book.Title}</td>
+          <td>${book.AssignedTo || '-'}</td>
+          <td>${deptCheckboxes}</td>
+          <td class="status-cell">${status}</td>
+          <td><input type="checkbox" class="done-checkbox" ${doneChecked}></td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // บันทึกข้อมูลที่ ผกก ลงนาม และสถานะดำเนินการ
+    async function saveBooks() {
+      const rows = document.querySelectorAll('#booksTable tbody tr');
+      for (const tr of rows) {
+        const bookId = tr.dataset.bookid;
+
+        // อ่าน checkbox สายงานที่เลือก
+        const checkedDepts = Array.from(tr.querySelectorAll('.dept-checkbox:checked')).map(cb => cb.value);
+        if (checkedDepts.length === 0) {
+          alert(`กรุณาเลือกสายงานสำหรับหนังสือรหัส ${bookId}`);
+          return;
+        }
+
+        // อ่านสถานะดำเนินการแล้ว
+        const doneChecked = tr.querySelector('.done-checkbox').checked;
+        const newStatus = doneChecked ? 'ดำเนินการแล้ว' : 'รอดำเนินการ';
+
+        // *** อัปเดตแต่ละสายงานที่เลือก (อาจต้องลบรายการเก่าหรืออัปเดตแยกตาม Business logic) ***
+
+        // ตัวอย่าง PATCH อัปเดตสถานะ DeptStatus ของหนังสือ (simplified)
+        // หากต้องอัปเดตหลายสายงาน อาจต้องส่งหลาย request
+
+        for (const dept of checkedDepts) {
+          const payload = {
+            data: [{
+              DeptStatus: newStatus,
+              Department: dept
+            }]
+          };
+          try {
+            await fetch(`${SHEETDB_API}/BookId/${bookId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+          } catch (error) {
+            alert(`เกิดข้อผิดพลาดขณะอัปเดตหนังสือรหัส ${bookId}`);
+            console.error(error);
+          }
+        }
+      }
+      alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+      loadBooks();
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', saveBooks);
+
+    // โหลดข้อมูลเมื่อเปิดหน้า
+    loadBooks();
+  </script>
+</body>
+</html>

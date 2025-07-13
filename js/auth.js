@@ -16,11 +16,13 @@ function checkLogin() {
   try {
     // decode base64 token เป็น username
     const username = atob(token);
+    const role = atob(token);
 
     // คุณอาจเช็ค username นี้กับรายการ user จาก API หรือ localStorage อีกที
     if (!username) throw new Error('ไม่มีชื่อผู้ใช้');
 
     console.log('Logged in as:', username);
+    console.log('role in as:', role);
     // หรือแสดงชื่อผู้ใช้บนหน้าเว็บ
   } catch (err) {
     alert('Token ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่');

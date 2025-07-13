@@ -12,7 +12,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (!res.ok) throw new Error('โหลดข้อมูลไม่ได้');
 
     const users = await res.json();
-    const found = users.find(u => u.Username === username && u.Password === hash);
+    const found = users.find(u => u.Username === username && u.Password === hash );
 
     if (found) {
       Swal.fire({
@@ -22,7 +22,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         timer: 1500
       }).then(() => {
         // ✅ สร้าง token base64 จาก username
-        const token = btoa(username);
+        const tokenPayload = {
+          username: found.Username,
+          role: found.Role, // ✅ R ใหญ่ตามฟิลด์จริง
+          email: found.Email
+        };
+        const token = btoa(JSON.stringify(tokenPayload));
 
         // ✅ เก็บเป็น cookie ชื่อ token อายุ 10 นาที
         document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
