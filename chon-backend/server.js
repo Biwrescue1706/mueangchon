@@ -18,17 +18,7 @@ const db = admin.database();
 
 app.get('/', (req, res) => {
   res.send('✅ Backend OK - Firebase Realtime Database');
-  const ref = db.ref('items');
-  ref.once(
-    'value',
-    snapshot => {
-      res.json(snapshot.val() || {}); // คืนค่าเป็น object ว่างถ้าไม่มีข้อมูล
-    },
-    errorObject => {
-      console.error('Read failed:', errorObject);
-      res.status(500).send('เกิดข้อผิดพลาดในการอ่านข้อมูล');
-    }
-  );
+
 });
 
 app.get('/items', (req, res) => {
