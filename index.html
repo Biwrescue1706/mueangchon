@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8" />
   <title>งานธุรการ - สภ.เมืองชลบุรี</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/index.css" />
+  <link rel="stylesheet" href="css/nav.css">
 </head>
 
 <body>
-  <nav>
-    <ul>
-      <li><a href="index.html">หน้าแรก</a></li>
-      <li><a href="pick-up-book.html">ลงรับหนังสือ</a></li>
-    </ul>
-  </nav>
 
-  
+  <div id="navbar"></div>
 
   <h1>📚 รายการหนังสือ</h1>
   <h2>รายชื่อผู้ใช้</h2>
@@ -38,10 +34,10 @@
 
   <!-- ถ้ามี auth.js ใช้ checkLogin() ก็ใส่ตรงนี้ได้ -->
   <script src="/js/auth.js"></script>
-  <script>
-    if (typeof checkLogin === 'function') {
-      checkLogin();
-    }
-  </script>
+
+  <script src="/js/navbar.js"></script>
+
+  <!-- <script>checkLogin();</script> -->
 </body>
+
 </html>

@@ -6,16 +6,13 @@
     <title>เพิ่มหนังสือ</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/pick-up-book.css" />
+    <link rel="stylesheet" href="css/nav.css" />
+    
 </head>
 
 <body>
-    <nav>
-        <!-- <div class="menu-toggle" id="menu-toggle">☰</div> -->
-        <ul id="nav-list">
-            <li><a href="index.html">หน้าแรก</a></li>
-            <li><a href="pick-up-book.html">ลงรับหนังสือ</a></li>
-        </ul>
-    </nav>
+    <div id="navbar"></div>
+
     <h1>ลงรับหนังสือ</h1>
 
     <form id="addBookForm">
@@ -37,8 +34,12 @@
         <button type="submit">บันทึก</button>
     </form>
     <script src="/js/pick-up-book.js"></script>
+
     <script src="/js/auth.js"></script>
-    <script>checkLogin();</script>
+
+    <script src="/js/navbar.js"></script>
+
+    <!-- <script>checkLogin();</script> -->
 
 </body>
 
