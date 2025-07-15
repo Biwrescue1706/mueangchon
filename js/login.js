@@ -30,7 +30,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     alert('เข้าสู่ระบบสำเร็จ!');
 
     // ทำอย่างอื่น เช่น redirect ไปหน้าอื่น
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
 
   } catch (error) {
     console.error('Login failed:', error);
