@@ -1,54 +1,39 @@
-const SHEETDB_USERS = 'https://sheetdb.io/api/v1/e2bc8d71li1qz';
-
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const username = e.target.username.value.trim();
   const password = e.target.password.value;
-  const hash = CryptoJS.SHA256(password).toString();
+
+  if (!username || !password) {
+    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+    return;
+  }
 
   try {
-    const res = await fetch(SHEETDB_USERS);
-    if (!res.ok) throw new Error('โหลดข้อมูลไม่ได้');
+    const res = await fetch('https://mueangchon1.onrender.com/login', {
+      method: 'POST',
+      credentials: 'include',   // สำคัญ! เพื่อให้ cookie ถูกส่งกลับและเก็บใน browser
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
 
-    const users = await res.json();
-    const found = users.find(u => u.Username === username && u.Password === hash );
-
-    if (found) {
-      Swal.fire({
-        icon: 'success',
-        title: 'เข้าสู่ระบบสำเร็จ!',
-        showConfirmButton: false,
-        timer: 1500
-      }).then(() => {
-        // ✅ สร้าง token base64 จาก username
-        const tokenPayload = {
-          username: found.Username,
-          role: found.Role, // ✅ R ใหญ่ตามฟิลด์จริง
-          email: found.Email
-        };
-        const token = btoa(JSON.stringify(tokenPayload));
-
-        // ✅ เก็บเป็น cookie ชื่อ token อายุ 10 นาที
-        document.cookie = `token=${token}; path=/; max-age=${60 * 10}`;
-
-        // ✅ redirect ไปหน้า index.html
-        window.location.href = 'index.html';
-      });
-
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Username หรือ Password ไม่ถูกต้อง',
-        showConfirmButton: true
-      });
+    if (!res.ok) {
+      const errData = await res.json();
+      alert(`Error: ${errData.error || res.statusText}`);
+      return;
     }
 
-  } catch (err) {
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: err.message
-    });
+    const data = await res.json();
+
+    alert('เข้าสู่ระบบสำเร็จ!');
+
+    // ทำอย่างอื่น เช่น redirect ไปหน้าอื่น
+    window.location.href = '/dashboard.html';
+
+  } catch (error) {
+    console.error('Login failed:', error);
+    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
   }
 });
