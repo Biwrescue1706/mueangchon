@@ -5,14 +5,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const password = e.target.password.value;
 
   if (!username || !password) {
-    alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+    Swal.fire('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
     return;
   }
 
   try {
     const res = await fetch('https://mueangchon1.onrender.com/login', {
       method: 'POST',
-      credentials: 'include',   // สำคัญ! เพื่อให้ cookie ถูกส่งกลับและเก็บใน browser
+      credentials: 'include', // สำคัญ!
       headers: {
         'Content-Type': 'application/json',
       },
@@ -21,19 +21,31 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (!res.ok) {
       const errData = await res.json();
-      alert(`Error: ${errData.error || res.statusText}`);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: errData.error || res.statusText,
+      });
       return;
     }
 
     const data = await res.json();
 
-    alert('เข้าสู่ระบบสำเร็จ!');
+    await Swal.fire({
+      icon: 'success',
+      title: 'เข้าสู่ระบบสำเร็จ!',
+      text: `ยินดีต้อนรับ ${data.user?.Username || ''}`,
+    });
 
-    // ทำอย่างอื่น เช่น redirect ไปหน้าอื่น
+    // เปลี่ยนหน้า
     window.location.href = 'index.html';
 
   } catch (error) {
     console.error('Login failed:', error);
-    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
+    });
   }
 });
