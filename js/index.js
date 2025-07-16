@@ -1,20 +1,6 @@
-// สมมติคุณใช้ Firebase SDK v9+ แบบ Modular
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+// index.js
 
-const firebaseConfig = {
-  apiKey: "BGJ0u3GsrHJCKGRIik4LQtJ3ah89yJAL3ucsoB2PosS3Sb7oECqrP0_udGiynxK5KB9v79aSrfL74zG_UF4XyJA",
-  authDomain: "mueangchonburi-c9438.firebaseapp.com",
-  projectId: "mueangchonburi-c9438",
-  storageBucket: "mueangchonburi-c9438.appspot.com",
-  messagingSenderId: "940309310589",
-  appId: "1:940309310589:web:950a5fdf0626de417f5514"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const API_BASE = 'https://mueangchon1.onrender.com'; // เปลี่ยนเป็น backend ของคุณ
 
 const namesUl = document.getElementById("names-ul");
 const booksUl = document.getElementById("books-ul");
@@ -22,79 +8,108 @@ const searchInput = document.getElementById("search-input");
 const loadingDiv = document.getElementById("loading");
 const errorDiv = document.getElementById("error");
 
-function logout() {
-  signOut(auth).then(() => {
-    window.location.href = "login.html";
-  });
-}
-window.logout = logout;  // เพื่อให้เรียกจาก onclick ใน html ได้
+let allBooks = [];
 
+/**
+ * เรียก API โหลด users
+ */
 async function loadUsers() {
   try {
     loadingDiv.style.display = "block";
-    const usersCol = collection(db, "users"); // สมมติ collection ชื่อ users
-    const snapshot = await getDocs(usersCol);
+    errorDiv.textContent = "";
+
+    const res = await fetch(`${API_BASE}/users`, {
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('โหลด users ไม่ได้');
+
+    const users = await res.json();
     namesUl.innerHTML = "";
-    snapshot.forEach(doc => {
-      const user = doc.data();
+
+    Object.values(users).forEach(user => {
       const li = document.createElement("li");
-      li.textContent = user.name || user.email || "ไม่ระบุชื่อ";
+      li.textContent = `${user.Name} (${user.Username})`;
       namesUl.appendChild(li);
     });
-  } catch (e) {
-    errorDiv.textContent = "โหลดรายชื่อผู้ใช้ผิดพลาด: " + e.message;
+
+  } catch (err) {
+    console.error('[loadUsers]', err);
+    errorDiv.textContent = `โหลด users ผิดพลาด: ${err.message}`;
   } finally {
     loadingDiv.style.display = "none";
   }
 }
 
-async function searchBooks(keyword) {
-  if (!keyword) {
-    booksUl.innerHTML = "";
-    return;
-  }
+/**
+ * เรียก API โหลด books
+ */
+async function loadBooks() {
   try {
     loadingDiv.style.display = "block";
-    booksUl.innerHTML = "";
-    // สมมติ collection ชื่อ books และค้นหาจากฟิลด์ subject
-    const booksCol = collection(db, "books");
-    // ใช้ query where กับการค้นหาที่เหมาะสม (Firebase Firestore ไม่มี contains, อาจใช้ indexing หรือแก้ logic)
-    // ตัวอย่างนี้คือ fetch ทั้งหมดแล้ว filter ใน client (ไม่เหมาะกับข้อมูลใหญ่)
-    const snapshot = await getDocs(booksCol);
-    const results = [];
-    snapshot.forEach(doc => {
-      const book = doc.data();
-      if ((book.subject && book.subject.toLowerCase().includes(keyword.toLowerCase())) ||
-          (book.docNumber && book.docNumber.toLowerCase().includes(keyword.toLowerCase()))) {
-        results.push(book);
-      }
-    });
+    errorDiv.textContent = "";
 
-    if (results.length === 0) {
-      booksUl.innerHTML = "<li>ไม่พบข้อมูลหนังสือ</li>";
-    } else {
-      results.forEach(book => {
-        const li = document.createElement("li");
-        li.textContent = `${book.docNumber || ""} - ${book.subject || ""} (${book.receiveDate || ""})`;
-        booksUl.appendChild(li);
-      });
-    }
-  } catch (e) {
-    errorDiv.textContent = "ค้นหาหนังสือผิดพลาด: " + e.message;
+    const res = await fetch(`${API_BASE}/books`, {
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('โหลด books ไม่ได้');
+
+    const books = await res.json();
+    allBooks = Object.values(books || {});
+    renderBooks(allBooks);
+
+  } catch (err) {
+    console.error('[loadBooks]', err);
+    errorDiv.textContent = `โหลด books ผิดพลาด: ${err.message}`;
   } finally {
     loadingDiv.style.display = "none";
   }
 }
 
-searchInput.addEventListener("input", (e) => {
+/**
+ * แสดง books list
+ */
+function renderBooks(books) {
+  booksUl.innerHTML = "";
+  if (books.length === 0) {
+    booksUl.innerHTML = "<li>ไม่พบหนังสือ</li>";
+    return;
+  }
+  books.forEach(book => {
+    const li = document.createElement("li");
+    li.textContent = `${book.BookNo || ''} - ${book.Title || ''} (${book.date || ''})`;
+    booksUl.appendChild(li);
+  });
+}
+
+/**
+ * ฟิลเตอร์ค้นหา
+ */
+function searchBooks(keyword) {
+  if (!keyword) {
+    renderBooks(allBooks);
+    return;
+  }
+  const filtered = allBooks.filter(book =>
+    (book.Title && book.Title.toLowerCase().includes(keyword.toLowerCase())) ||
+    (book.BookNo && book.BookNo.toLowerCase().includes(keyword.toLowerCase()))
+  );
+  renderBooks(filtered);
+}
+
+searchInput.addEventListener("input", e => {
   searchBooks(e.target.value);
 });
 
-// ตรวจสอบ login ก่อนโหลดข้อมูล
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = "login.html";
+/**
+ * เรียก checkLogin() จาก auth.js
+ * ถ้า login OK => โหลด Users + Books
+ * ถ้าไม่ OK => redirect ไป login.html
+ */
+checkLogin().then(isLoggedIn => {
+  if (!isLoggedIn) {
+    window.location.href = 'login.html';
   } else {
     loadUsers();
+    loadBooks();
   }
 });
