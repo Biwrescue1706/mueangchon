@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/index.css" />
   <link rel="stylesheet" href="css/nav.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -14,30 +16,25 @@
   <div id="navbar"></div>
 
   <h1>📚 รายการหนังสือ</h1>
+
   <h2>รายชื่อผู้ใช้</h2>
   <ul id="names-ul"></ul>
 
-  <!-- ปุ่ม logout ที่ใช้ id ตรงกับ index.js -->
+  <!-- ปุ่ม logout -->
   <button onclick="logout()">ออกจากระบบ</button>
 
-
-
   <h2>ค้นหาและแสดงหนังสือ</h2>
-  <input type="text" id="search-input" placeholder="🔍 พิมพ์ชื่อเรื่องหรือข้อมูลที่ต้องการค้นหา..." />
+  <input type="text" id="search-input" placeholder="🔍 พิมพ์ชื่อเรื่องหรือเลขที่หนังสือ..." />
   <ul id="books-ul"></ul>
 
   <div id="loading" style="display:none;">⏳ กำลังโหลดข้อมูล...</div>
   <div id="error"></div>
 
-  <!-- โหลด script ที่เกี่ยวข้อง -->
-  <script src="js/index.js"></script>
-
-  <!-- ถ้ามี auth.js ใช้ checkLogin() ก็ใส่ตรงนี้ได้ -->
+  <!-- Scripts -->
   <script src="js/auth.js"></script>
-
+  <script src="js/index.js"></script>
   <script src="js/navbar.js"></script>
 
-  <script>checkLogin();</script>
 </body>
 
 </html>
