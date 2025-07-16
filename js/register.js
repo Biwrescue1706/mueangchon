@@ -1,82 +1,61 @@
-const SHEETDB_USERS = 'https://sheetdb.io/api/v1/e2bc8d71li1qz';
-
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const username = e.target.username.value.trim();
+  const password = e.target.password.value.trim();
   const name = e.target.name.value.trim();
   const email = e.target.email.value.trim();
-  const password = e.target.password.value;
-  const role = e.target.role.value;
+  const role = e.target.role.value.trim();
 
-  if (!role) {
+  if (!username || !password || !name || !email || !role) {
     Swal.fire({
       icon: 'warning',
-      title: 'กรุณาเลือกสายงาน (Role)'
+      title: 'กรุณากรอกข้อมูลให้ครบทุกช่อง'
     });
     return;
   }
 
-  const hash = CryptoJS.SHA256(password).toString();
-
   try {
-    // ดึงข้อมูลทั้งหมดจาก SheetDB
-    const resUsers = await fetch(SHEETDB_USERS);
-    const users = await resUsers.json();
-
-    // หา UserId สูงสุด
-    let maxId = 0;
-    users.forEach(user => {
-      const idNum = parseInt(user.UserId);
-      if (!isNaN(idNum) && idNum > maxId) maxId = idNum;
-    });
-    const newUserId = maxId + 1;
-
-    // วันที่ปัจจุบันแบบ ISO String
-    const now = new Date().toISOString();
-
-    const data = {
-      data: [{
-        UserId: newUserId.toString(),
-        Username: username,
-        Password: hash,
-        Name: name,
-        Email: email,
-        Role: role,
-        created_at: now
-      }]
-    };
-
-    // ส่ง POST
-    const res = await fetch(SHEETDB_USERS, {
+    const res = await fetch('https://mueangchon1.onrender.com/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        name,
+        email,
+        role
+      }),
+      credentials: 'include' // ✅ เผื่อในอนาคตมี cookie set
     });
 
-    const text = await res.text();
+    const data = await res.json();
 
-    if (res.ok) {
-      Swal.fire({
-        icon: 'success',
-        title: 'สมัครสมาชิกสำเร็จ!',
-        showConfirmButton: false,
-        timer: 2000
-      }).then(() => {
-        window.location.href = 'register.html';
-      });
-    } else {
+    if (!res.ok) {
       Swal.fire({
         icon: 'error',
-        title: 'สมัครสมาชิกล้มเหลว',
-        text: text
+        title: 'เกิดข้อผิดพลาด',
+        text: data.error || 'สมัครสมาชิกไม่สำเร็จ'
       });
+      return;
     }
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'สมัครสมาชิกสำเร็จ!',
+      text: `ยินดีต้อนรับคุณ ${username}`
+    });
+
+    window.location.href = 'login.html'; // ✅ ไปหน้า Login หลังสมัครเสร็จ
+
   } catch (err) {
+    console.error(err);
     Swal.fire({
       icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: err.message
+      title: 'เชื่อมต่อไม่ได้',
+      text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'
     });
   }
 });

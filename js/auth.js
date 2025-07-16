@@ -1,36 +1,82 @@
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
+// auth.js
 
-function checkLogin() {
-  const token = getCookie('token');
-  if (!token) {
-    alert('กรุณาเข้าสู่ระบบก่อน');
-    window.location.href = 'login.html';
-    return;
-  }
+const API_BASE = 'https://mueangchon1.onrender.com'; // เปลี่ยนตาม backend ของคุณ
 
+/**
+ * ฟังก์ชัน login
+ * @param {string} username 
+ * @param {string} password 
+ * @returns {Promise<boolean>} true ถ้าล็อกอินสำเร็จ
+ */
+async function login(username, password) {
   try {
-    // decode base64 token เป็น username
-    const username = atob(token);
-    const role = atob(token);
+    const res = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'  // ส่ง cookie รับ cookie ด้วย
+    });
 
-    // คุณอาจเช็ค username นี้กับรายการ user จาก API หรือ localStorage อีกที
-    if (!username) throw new Error('ไม่มีชื่อผู้ใช้');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'เข้าสู่ระบบไม่สำเร็จ');
+    }
 
-    console.log('Logged in as:', username);
-    console.log('role in as:', role);
-    // หรือแสดงชื่อผู้ใช้บนหน้าเว็บ
-  } catch (err) {
-    alert('Token ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่');
-    window.location.href = 'login.html';
+    // login สำเร็จ backend จะเซ็ต cookie jwt ให้แล้ว
+    return true;
+  } catch (error) {
+    console.error('Login error:', error);
+    alert(error.message);
+    return false;
   }
 }
 
-function logout() {
-  document.cookie = "token=; path=/; max-age=0";
-  window.location.href = 'login.html';
+/**
+ * ฟังก์ชันเช็คสถานะ login ว่ายัง valid หรือไม่
+ * @returns {Promise<boolean>}
+ */
+async function checkLogin() {
+  try {
+    const res = await fetch(`${API_BASE}/private-data`, {
+      credentials: 'include'
+    });
+
+    if (res.ok) {
+      // token ยัง valid
+      return true;
+    } else {
+      // token หมดอายุหรือไม่ถูกต้อง
+      return false;
+    }
+  } catch (error) {
+    console.error('Check login error:', error);
+    return false;
+  }
 }
+
+/**
+ * ฟังก์ชัน logout
+ */
+async function logout() {
+  try {
+    const res = await fetch(`${API_BASE}/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (res.ok) {
+      window.location.href = 'login.html';
+    } else {
+      alert('ออกจากระบบไม่สำเร็จ');
+    }
+  } catch (error) {
+    alert('เกิดข้อผิดพลาดขณะออกจากระบบ');
+  }
+}
+
+// export ถ้าใช้ module
+// export { login, checkLogin, logout };
+
+// หรือถ้าไม่ใช้ module ก็ผูกกับ window เพื่อเรียกจากหน้าอื่นได้
+window.login = login;
+window.checkLogin = checkLogin;
+window.logout = logout;
